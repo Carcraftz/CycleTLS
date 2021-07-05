@@ -17,14 +17,15 @@ import (
 
 // Options sets CycleTLS client options
 type Options struct {
-	URL       string            `json:"url"`
-	Method    string            `json:"method"`
-	Headers   map[string]string `json:"headers"`
-	Body      string            `json:"body"`
-	Ja3       string            `json:"ja3"`
-	UserAgent string            `json:"userAgent"`
-	Proxy     string            `json:"proxy"`
-	Cookies   []Cookie          `json:"cookies"`
+	URL           string            `json:"url"`
+	Method        string            `json:"method"`
+	Headers       map[string]string `json:"headers"`
+	Body          string            `json:"body"`
+	Ja3           string            `json:"ja3"`
+	UserAgent     string            `json:"userAgent"`
+	Proxy         string            `json:"proxy"`
+	Cookies       []Cookie          `json:"cookies"`
+	AllowRedirect bool              `json:"allowRedirect`
 }
 
 type cycleTLSRequest struct {
@@ -82,7 +83,7 @@ func processRequest(request cycleTLSRequest) (result fullRequest) {
 		Cookies:   request.Options.Cookies,
 	}
 
-	client, err := newClient(browser, request.Options.Proxy)
+	client, err := newClient(browser, request.Options.AllowRedirect, request.Options.Proxy)
 	if err != nil {
 		log.Fatal(err)
 	}
