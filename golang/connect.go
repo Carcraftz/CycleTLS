@@ -22,13 +22,14 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"errors"
-	"golang.org/x/net/proxy"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"strconv"
 	"sync"
+
+	"golang.org/x/net/proxy"
 
 	"golang.org/x/net/http2"
 )
@@ -37,8 +38,7 @@ import (
 type connectDialer struct {
 	ProxyURL      url.URL
 	DefaultHeader http.Header
-
-	Dialer net.Dialer // overridden dialer allow to control establishment of TCP connection
+	Dialer        net.Dialer // overridden dialer allow to control establishment of TCP connection
 
 	// overridden DialTLS allows user to control establishment of TLS connection
 	// MUST return connection with completed Handshake, and NegotiatedProtocol

@@ -22,15 +22,17 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"errors"
-	"golang.org/x/net/proxy"
 	"io"
 	"net"
-	"net/http"
 	"net/url"
 	"strconv"
 	"sync"
 
-	"golang.org/x/net/http2"
+	http "github.com/useflyent/fhttp"
+
+	"golang.org/x/net/proxy"
+
+	"github.com/useflyent/fhttp/http2"
 )
 
 // connectDialer allows to configure one-time use HTTP CONNECT client
@@ -120,6 +122,7 @@ func (c *connectDialer) DialContext(ctx context.Context, network, address string
 		Header: make(http.Header),
 		Host:   address,
 	}).WithContext(ctx)
+
 	for k, v := range c.DefaultHeader {
 		req.Header[k] = v
 	}
@@ -128,6 +131,7 @@ func (c *connectDialer) DialContext(ctx context.Context, network, address string
 			req.Header[k] = v
 		}
 	}
+
 	connectHTTP2 := func(rawConn net.Conn, h2clientConn *http2.ClientConn) (net.Conn, error) {
 		req.Proto = "HTTP/2.0"
 		req.ProtoMajor = 2

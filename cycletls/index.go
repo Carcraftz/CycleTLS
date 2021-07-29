@@ -5,12 +5,13 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"runtime"
 	"strings"
 	"time"
+
+	http "github.com/useflyent/fhttp"
 
 	"github.com/gorilla/websocket"
 )
@@ -76,7 +77,6 @@ func getWebsocketAddr() string {
 
 // ready Request
 func processRequest(request cycleTLSRequest) (result fullRequest) {
-
 	var browser = browser{
 		JA3:       request.Options.Ja3,
 		UserAgent: request.Options.UserAgent,
@@ -92,10 +92,61 @@ func processRequest(request cycleTLSRequest) (result fullRequest) {
 		log.Print(request.RequestID + "Request_Id_On_The_Left" + err.Error())
 		return
 	}
-	for k, v := range request.Options.Headers {
-		if k != "host" {
-			req.Header.Set(k, v)
+	masterheaderorder := []string{
+		"host",
+		"connection",
+		"cache-control",
+		"device-memory",
+		"viewport-width",
+		"rtt",
+		"downlink",
+		"ect",
+		"sec-ch-ua",
+		"sec-ch-ua-mobile",
+		"sec-ch-ua-full-version",
+		"sec-ch-ua-arch",
+		"sec-ch-ua-platform",
+		"sec-ch-ua-platform-version",
+		"sec-ch-ua-model",
+		"upgrade-insecure-requests",
+		"user-agent",
+		"accept",
+		"sec-fetch-site",
+		"sec-fetch-mode",
+		"sec-fetch-user",
+		"sec-fetch-dest",
+		"referer",
+		"accept-encoding",
+		"accept-language",
+		"cookie",
+	}
+	headermap := make(map[string]string)
+
+	//TODO: REDUCE TIME COMPLEXITY
+	headerorderkey := []string{}
+	for _, key := range masterheaderorder {
+		for k, v := range request.Options.Headers {
+			lowercasekey := strings.ToLower(k)
+			if key == lowercasekey {
+				headermap[k] = v
+				headerorderkey = append(headerorderkey, lowercasekey)
+			}
 		}
+
+	}
+	//if master header order doesn't contain the header, add it to the end
+	for k, v := range request.Options.Headers {
+		if _, ok := headermap[k]; !ok {
+			headermap[k] = v
+			headerorderkey = append(headerorderkey, strings.ToLower(k))
+		}
+	}
+	req.Header = http.Header{
+		http.HeaderOrderKey:  headerorderkey,
+		http.PHeaderOrderKey: {":method", ":authority", ":scheme", ":path"},
+	}
+	for k, v := range headermap {
+		req.Header.Set(k, v)
 	}
 	return fullRequest{req: req, client: client, options: request}
 
